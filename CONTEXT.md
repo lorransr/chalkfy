@@ -13,7 +13,7 @@ The people in the call who watch the presenter's shared screen.
 _Avoid_: viewers, participants
 
 **Overlay**:
-The transparent layer above every app where Chalkfy draws its effects.
+The transparent layer above every app, on every display, where Chalkfy draws its effects.
 
 **Highlight**:
 A mode where a ring follows the cursor so the audience can find it.
