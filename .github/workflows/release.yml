@@ -1,0 +1,37 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      # Xcode: plain swift test (see test.sh)
+      - run: swift test
+      - name: Import the signing certificate
+        env:
+          SIGNING_P12: ${{ secrets.SIGNING_P12 }}
+          SIGNING_P12_PASSWORD: ${{ secrets.SIGNING_P12_PASSWORD }}
+        run: |
+          KC=$RUNNER_TEMP/signing.keychain-db
+          echo "$SIGNING_P12" | base64 --decode > "$RUNNER_TEMP/chalkfy.p12"
+          security create-keychain -p ci "$KC"
+          security set-keychain-settings -lut 21600 "$KC"
+          security unlock-keychain -p ci "$KC"
+          security import "$RUNNER_TEMP/chalkfy.p12" -k "$KC" -P "$SIGNING_P12_PASSWORD" -T /usr/bin/codesign
+          rm "$RUNNER_TEMP/chalkfy.p12"
+          security set-key-partition-list -S apple-tool:,apple: -s -k ci "$KC" > /dev/null
+          security list-keychains -d user -s "$KC"
+          ID=$(security find-identity -p codesigning "$KC" | awk '/1\)/ && !n++ {print $2}')
+          test -n "$ID"
+          echo "SIGN_ID=$ID" >> "$GITHUB_ENV"
+      - run: VERSION=${GITHUB_REF_NAME#v} BUILD=$GITHUB_RUN_NUMBER ./bundle.sh --arch arm64 --arch x86_64
+      - run: ditto -c -k --keepParent build/Chalkfy.app Chalkfy.zip
+      - run: gh release create "$GITHUB_REF_NAME" Chalkfy.zip --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}

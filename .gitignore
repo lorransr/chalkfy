@@ -1,3 +1,4 @@
 progress.txt
 .build/
 build/
+*.p12*
