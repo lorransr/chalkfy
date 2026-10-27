@@ -1,6 +1,6 @@
 #!/bin/sh
-# Builds and signs build/Chalkfy.app. Signs ad hoc unless SIGN_ID is the SHA-1 of a code signing
-# identity in the keychain search list; a self-signed one keeps the Accessibility grant across rebuilds.
+# SIGN_ID: SHA-1 of a code signing identity in the keychain search list, else ad hoc.
+# A self-signed identity keeps the Accessibility grant across rebuilds.
 set -e
 cd "$(dirname "$0")"
 swift build -c release

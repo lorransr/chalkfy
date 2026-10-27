@@ -3,17 +3,19 @@ import Carbon.HIToolbox
 import Core
 
 var chalk = Chalk()
-var overlays: [(window: NSWindow, ring: CAShapeLayer, frame: CGRect)] = []
+var overlays: [(window: NSWindow, ring: CAShapeLayer)] = []
+var primaryHeight: CGFloat = 0
 var tap: CFMachPort?
 
 @discardableResult
 func handle(_ event: Event) -> Disposition {
-    let disposition = chalk.handle(event, at: CACurrentMediaTime())
-    let scene = chalk.scene(at: CACurrentMediaTime())
+    let now = CACurrentMediaTime()
+    let disposition = chalk.handle(event, at: now)
+    let scene = chalk.scene(at: now)
     CATransaction.begin()
     CATransaction.setDisableActions(true)
     for overlay in overlays {
-        if case .ring(let p)? = scene.local(in: overlay.frame).marker {
+        if case .ring(let p)? = scene.local(in: overlay.window.frame).marker {
             overlay.ring.position = p
             overlay.ring.isHidden = false
         } else {
@@ -26,6 +28,7 @@ func handle(_ event: Event) -> Disposition {
 
 func buildOverlays() {
     overlays.forEach { $0.window.orderOut(nil) }
+    primaryHeight = NSScreen.screens.first?.frame.height ?? 0
     overlays = NSScreen.screens.map { screen in
         let window = NSWindow(contentRect: screen.frame, styleMask: .borderless, backing: .buffered, defer: false)
         window.setFrame(screen.frame, display: false)
@@ -49,7 +52,7 @@ func buildOverlays() {
         window.contentView!.layer!.addSublayer(ring)
 
         window.orderFrontRegardless()
-        return (window, ring, screen.frame)
+        return (window, ring)
     }
     handle(.move(NSEvent.mouseLocation))
 }
@@ -63,7 +66,7 @@ func startTap() {
             return Unmanaged.passUnretained(event)
         }
         // CGEvent's origin is the top left of the primary display; Core's is its bottom left.
-        let p = CGPoint(x: event.location.x, y: NSScreen.screens[0].frame.height - event.location.y)
+        let p = CGPoint(x: event.location.x, y: primaryHeight - event.location.y)
         let e: Event = switch type {
         case .leftMouseDown: .press(p)
         case .leftMouseDragged: .drag(p)
@@ -101,22 +104,34 @@ func checkAccessibility() {
     accessibilityItem.title = trusted ? "Accessibility: granted" : "Accessibility: not granted"
     requestItem.isHidden = trusted
     if trusted, tap == nil { startTap() }
+    // A revoked grant leaves a dead tap; invalidating it also removes its run loop source, so a re-grant makes a new one.
+    if !trusted, let dead = tap {
+        CFMachPortInvalidate(dead)
+        tap = nil
+    }
 }
 checkAccessibility()
 Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in checkAccessibility() }
 
 var hotKeySpec = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
-InstallEventHandler(GetApplicationEventTarget(), { _, _, _ in
+let handlerStatus = InstallEventHandler(GetApplicationEventTarget(), { _, _, _ in
     handle(.toggleHighlight)
     return noErr
 }, 1, &hotKeySpec, nil, nil)
 var hotKey: EventHotKeyRef?
-RegisterEventHotKey(UInt32(kVK_ANSI_H), UInt32(controlKey | optionKey), EventHotKeyID(signature: 0x43484C4B, id: 1),
-                    GetApplicationEventTarget(), 0, &hotKey)
+let hotKeyStatus = RegisterEventHotKey(UInt32(kVK_ANSI_H), UInt32(controlKey | optionKey), EventHotKeyID(signature: 0x43484C4B, id: 1),
+                                        GetApplicationEventTarget(), 0, &hotKey)
+if let error = [handlerStatus, hotKeyStatus].first(where: { $0 != noErr }) {
+    menu.insertItem(withTitle: "⌃⌥H unavailable (error \(error))", action: nil, keyEquivalent: "", at: 0)
+}
 
 buildOverlays()
 NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { _ in
     buildOverlays()
+}
+// Moves the ring without Accessibility; the tap, once granted, reports the same moves again, which is harmless.
+NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged]) { _ in
+    handle(.move(NSEvent.mouseLocation))
 }
 
 app.run()

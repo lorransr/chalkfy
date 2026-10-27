@@ -21,7 +21,6 @@ public enum Marker: Equatable {
 public struct Scene: Equatable {
     public var marker: Marker?
 
-    /// The same scene in the local coordinates of the display with this frame.
     public func local(in frame: CGRect) -> Scene {
         Scene(marker: marker?.offset(by: frame.origin))
     }
