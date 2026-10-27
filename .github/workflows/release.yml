@@ -9,7 +9,9 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      # With Xcode, plain swift test finds Testing; test.sh is for Command Line Tools only.
+        with:
+          persist-credentials: false
+      # Xcode: plain swift test (see test.sh)
       - run: swift test
       - name: Import the signing certificate
         env:
@@ -22,10 +24,12 @@ jobs:
           security set-keychain-settings -lut 21600 "$KC"
           security unlock-keychain -p ci "$KC"
           security import "$RUNNER_TEMP/chalkfy.p12" -k "$KC" -P "$SIGNING_P12_PASSWORD" -T /usr/bin/codesign
+          rm "$RUNNER_TEMP/chalkfy.p12"
           security set-key-partition-list -S apple-tool:,apple: -s -k ci "$KC" > /dev/null
-          # codesign finds a self-signed identity only through the search list, and only by SHA-1.
           security list-keychains -d user -s "$KC"
-          echo "SIGN_ID=$(security find-identity -p codesigning "$KC" | awk '/1\)/ {print $2; exit}')" >> "$GITHUB_ENV"
+          ID=$(security find-identity -p codesigning "$KC" | awk '/1\)/ && !n++ {print $2}')
+          test -n "$ID"
+          echo "SIGN_ID=$ID" >> "$GITHUB_ENV"
       - run: VERSION=${GITHUB_REF_NAME#v} BUILD=$GITHUB_RUN_NUMBER ./bundle.sh --arch arm64 --arch x86_64
       - run: ditto -c -k --keepParent build/Chalkfy.app Chalkfy.zip
       - run: gh release create "$GITHUB_REF_NAME" Chalkfy.zip --generate-notes

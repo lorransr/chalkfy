@@ -17,4 +17,4 @@ To start Chalkfy at login, add it in System Settings > General > Login Items.
 
 ## Firefox-based browsers
 
-A screen share from Firefox, Zen or another Firefox-based browser does not show Chalkfy. Workaround: in `about:config`, set `media.getdisplaymedia.screencapturekit.picker.enabled` to `false` and restart the browser. On macOS 15 the browser then asks for the screen recording permission more often.
+A screen share from Firefox, Zen or another Firefox-based browser does not show Chalkfy. Workaround: in `about:config`, set `media.getdisplaymedia.screencapturekit.picker.enabled` to `false` and restart the browser. On macOS 15 this brings back repeated permission prompts.
