@@ -3,7 +3,7 @@ import Carbon.HIToolbox
 import Core
 
 var chalk = Chalk()
-var overlays: [(window: NSWindow, ring: CAShapeLayer)] = []
+var overlays: [(window: NSWindow, ring: CAShapeLayer, dot: CAShapeLayer, strokes: CALayer)] = []
 var primaryHeight: CGFloat = 0
 var tap: CFMachPort?
 
@@ -15,11 +15,37 @@ func handle(_ event: Event) -> Disposition {
     CATransaction.begin()
     CATransaction.setDisableActions(true)
     for overlay in overlays {
-        if case .ring(let p)? = scene.local(in: overlay.window.frame).marker {
-            overlay.ring.position = p
-            overlay.ring.isHidden = false
-        } else {
-            overlay.ring.isHidden = true
+        let local = scene.local(in: overlay.window.frame)
+        overlay.ring.isHidden = true
+        overlay.dot.isHidden = true
+        switch local.marker {
+        case .ring(let p)?: overlay.ring.position = p; overlay.ring.isHidden = false
+        case .dot(let p)?: overlay.dot.position = p; overlay.dot.isHidden = false
+        case nil: break
+        }
+        // Rebuilt on every event: an animation that began in the past resumes mid fade, so no layer needs to be tracked.
+        overlay.strokes.sublayers = local.strokes.map { stroke in
+            let layer = CAShapeLayer()
+            let path = CGMutablePath()
+            path.addLines(between: stroke.points)
+            layer.path = path
+            layer.lineWidth = 4
+            layer.lineCap = .round
+            layer.lineJoin = .round
+            layer.strokeColor = NSColor.systemRed.cgColor
+            layer.fillColor = nil
+            layer.contentsScale = overlay.window.backingScaleFactor
+            if let releasedAt = stroke.releasedAt {
+                // The model opacity is the end state, so the stroke stays hidden once the animation is removed.
+                layer.opacity = 0
+                let fade = CABasicAnimation(keyPath: "opacity")
+                fade.fromValue = 1
+                fade.toValue = 0
+                fade.beginTime = releasedAt
+                fade.duration = Stroke.fade
+                layer.add(fade, forKey: nil)
+            }
+            return layer
         }
     }
     CATransaction.commit()
@@ -49,10 +75,18 @@ func buildOverlays() {
         ring.fillColor = NSColor.systemYellow.withAlphaComponent(0.25).cgColor
         ring.contentsScale = screen.backingScaleFactor
         ring.isHidden = true
-        window.contentView!.layer!.addSublayer(ring)
+
+        let dot = CAShapeLayer()
+        dot.path = CGPath(ellipseIn: CGRect(x: -6, y: -6, width: 12, height: 12), transform: nil)
+        dot.fillColor = NSColor.systemRed.cgColor
+        dot.contentsScale = screen.backingScaleFactor
+        dot.isHidden = true
+
+        let strokes = CALayer()
+        [strokes, ring, dot].forEach(window.contentView!.layer!.addSublayer)
 
         window.orderFrontRegardless()
-        return (window, ring)
+        return (window, ring, dot, strokes)
     }
     handle(.move(NSEvent.mouseLocation))
 }
@@ -113,16 +147,35 @@ func checkAccessibility() {
 checkAccessibility()
 Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in checkAccessibility() }
 
+// The id of each hotkey is the index of its event here.
+let hotKeyEvents: [Event] = [.toggleHighlight, .toggleLaser, .escape]
+func registerHotKey(_ key: Int, modifiers: Int, id: UInt32) -> (EventHotKeyRef?, OSStatus) {
+    var ref: EventHotKeyRef?
+    let status = RegisterEventHotKey(UInt32(key), UInt32(modifiers), EventHotKeyID(signature: 0x43484C4B, id: id), GetApplicationEventTarget(), 0, &ref)
+    return (ref, status)
+}
+var escKey: EventHotKeyRef?
+
 var hotKeySpec = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
-let handlerStatus = InstallEventHandler(GetApplicationEventTarget(), { _, _, _ in
-    handle(.toggleHighlight)
+let handlerStatus = InstallEventHandler(GetApplicationEventTarget(), { _, event, _ in
+    var id = EventHotKeyID()
+    GetEventParameter(event, EventParamName(kEventParamDirectObject), EventParamType(typeEventHotKeyID), nil, MemoryLayout<EventHotKeyID>.size, nil, &id)
+    guard hotKeyEvents.indices.contains(Int(id.id)) else { return OSStatus(eventNotHandledErr) }
+    handle(hotKeyEvents[Int(id.id)])
+    // Esc is a hotkey only while the Laser is on, so it reaches other apps otherwise.
+    if chalk.laser, escKey == nil {
+        escKey = registerHotKey(kVK_Escape, modifiers: 0, id: 2).0
+    } else if !chalk.laser, let key = escKey {
+        UnregisterEventHotKey(key)
+        escKey = nil
+    }
     return noErr
 }, 1, &hotKeySpec, nil, nil)
-var hotKey: EventHotKeyRef?
-let hotKeyStatus = RegisterEventHotKey(UInt32(kVK_ANSI_H), UInt32(controlKey | optionKey), EventHotKeyID(signature: 0x43484C4B, id: 1),
-                                        GetApplicationEventTarget(), 0, &hotKey)
-if let error = [handlerStatus, hotKeyStatus].first(where: { $0 != noErr }) {
-    menu.insertItem(withTitle: "⌃⌥H unavailable (error \(error))", action: nil, keyEquivalent: "", at: 0)
+for (key, name, id) in [(kVK_ANSI_H, "⌃⌥H", UInt32(0)), (kVK_ANSI_L, "⌃⌥L", 1)] {
+    let status = handlerStatus != noErr ? handlerStatus : registerHotKey(key, modifiers: controlKey | optionKey, id: id).1
+    if status != noErr {
+        menu.insertItem(withTitle: "\(name) unavailable (error \(status))", action: nil, keyEquivalent: "", at: 0)
+    }
 }
 
 buildOverlays()
