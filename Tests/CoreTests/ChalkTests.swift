@@ -80,7 +80,6 @@ import Testing
 
     chalk.handle(.press(b), at: 2)
     chalk.handle(.drag(a), at: 2)
-    // Laser off mid drag ends the second stroke; both keep fading.
     chalk.handle(.toggleLaser, at: 2.5)
     chalk.handle(.drag(b), at: 2.6)
 
@@ -102,4 +101,37 @@ import Testing
     let right = scene.local(in: CGRect(x: 0, y: 0, width: 1512, height: 982))
     #expect(left.strokes.map(\.points) == [[CGPoint(x: 1910, y: 0), CGPoint(x: 1930, y: 0)]])
     #expect(right.strokes.map(\.points) == [[CGPoint(x: -10, y: 0), CGPoint(x: 10, y: 0)]])
+}
+
+@Test func laserOnMidDragLetsTheAppFinishItsDrag() {
+    var chalk = Chalk()
+    let p = CGPoint(x: 1, y: 2)
+    #expect(chalk.handle(.press(p), at: 0) == .pass)
+    chalk.handle(.toggleLaser, at: 0)
+    #expect(chalk.handle(.drag(p), at: 0) == .pass)
+    #expect(chalk.handle(.release(p), at: 0) == .pass)
+    #expect(chalk.scene(at: 0).strokes.isEmpty)
+    #expect(chalk.handle(.press(p), at: 1) == .swallow)
+}
+
+@Test func laserOffMidDragKeepsTheDragFromTheApp() {
+    var chalk = Chalk()
+    let p = CGPoint(x: 1, y: 2)
+    chalk.handle(.toggleLaser, at: 0)
+    #expect(chalk.handle(.press(p), at: 0) == .swallow)
+    chalk.handle(.toggleLaser, at: 0)
+    #expect(chalk.handle(.drag(p), at: 0) == .swallow)
+    #expect(chalk.handle(.release(p), at: 0) == .swallow)
+    #expect(chalk.handle(.press(p), at: 1) == .pass)
+}
+
+@Test func aPressAfterALostReleaseFadesThePreviousStroke() {
+    var chalk = Chalk()
+    let a = CGPoint(x: 0, y: 0), b = CGPoint(x: 10, y: 0)
+    chalk.handle(.toggleLaser, at: 0)
+    chalk.handle(.press(a), at: 0)
+    chalk.handle(.drag(b), at: 0)
+    chalk.handle(.press(b), at: 1)
+    #expect(chalk.scene(at: 1).strokes == [Stroke(points: [a, b], releasedAt: 1), Stroke(points: [b])])
+    #expect(chalk.scene(at: 3).strokes == [Stroke(points: [b])])
 }

@@ -23,7 +23,7 @@ public struct Stroke: Equatable {
     public static let fade = 2.0
 
     public var points: [CGPoint]
-    /// Nil while the drag goes on; the fade runs from here for `fade` seconds.
+    /// Nil while the drag goes on.
     public var releasedAt: Double?
 
     public init(points: [CGPoint], releasedAt: Double? = nil) {
@@ -52,6 +52,8 @@ public struct Chalk {
     var cursor = CGPoint.zero
     var strokes: [Stroke] = []
     var drawing: Stroke?
+    // Decided on press, so a Laser toggle mid gesture never splits a press from its release.
+    var swallowing = false
 
     public init() {}
 
@@ -74,17 +76,20 @@ public struct Chalk {
             return .pass
         case .press(let p):
             cursor = p
+            // The release of the last stroke may have been lost, e.g. while the tap was disabled.
+            endStroke(at: time)
+            swallowing = laser
             guard laser else { return .pass }
             drawing = Stroke(points: [p])
             return .swallow
         case .drag(let p):
             cursor = p
-            guard laser else { return .pass }
+            guard swallowing else { return .pass }
             drawing?.points.append(p)
             return .swallow
         case .release(let p):
             cursor = p
-            guard laser else { return .pass }
+            guard swallowing else { return .pass }
             endStroke(at: time)
             return .swallow
         }

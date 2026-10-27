@@ -24,6 +24,7 @@ func handle(_ event: Event) -> Disposition {
         case nil: break
         }
         // Rebuilt on every event: an animation that began in the past resumes mid fade, so no layer needs to be tracked.
+        // ponytail: the whole path of every stroke is rebuilt per event, O(n²) over a drag; append to the live layer's path if long drags lag.
         overlay.strokes.sublayers = local.strokes.map { stroke in
             let layer = CAShapeLayer()
             let path = CGMutablePath()
@@ -149,12 +150,17 @@ Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in checkAccessibili
 
 // The id of each hotkey is the index of its event here.
 let hotKeyEvents: [Event] = [.toggleHighlight, .toggleLaser, .escape]
-func registerHotKey(_ key: Int, modifiers: Int, id: UInt32) -> (EventHotKeyRef?, OSStatus) {
+func registerHotKey(_ key: Int, modifiers: Int, for event: Event) -> (EventHotKeyRef?, OSStatus) {
     var ref: EventHotKeyRef?
-    let status = RegisterEventHotKey(UInt32(key), UInt32(modifiers), EventHotKeyID(signature: 0x43484C4B, id: id), GetApplicationEventTarget(), 0, &ref)
+    let id = EventHotKeyID(signature: 0x43484C4B, id: UInt32(hotKeyEvents.firstIndex(of: event)!))
+    let status = RegisterEventHotKey(UInt32(key), UInt32(modifiers), id, GetApplicationEventTarget(), 0, &ref)
     return (ref, status)
 }
+func showUnavailable(_ name: String, _ status: OSStatus) {
+    menu.insertItem(withTitle: "\(name) unavailable (error \(status))", action: nil, keyEquivalent: "", at: 0)
+}
 var escKey: EventHotKeyRef?
+var escUnavailableShown = false
 
 var hotKeySpec = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
 let handlerStatus = InstallEventHandler(GetApplicationEventTarget(), { _, event, _ in
@@ -164,18 +170,21 @@ let handlerStatus = InstallEventHandler(GetApplicationEventTarget(), { _, event,
     handle(hotKeyEvents[Int(id.id)])
     // Esc is a hotkey only while the Laser is on, so it reaches other apps otherwise.
     if chalk.laser, escKey == nil {
-        escKey = registerHotKey(kVK_Escape, modifiers: 0, id: 2).0
+        let status: OSStatus
+        (escKey, status) = registerHotKey(kVK_Escape, modifiers: 0, for: .escape)
+        if status != noErr, !escUnavailableShown {
+            showUnavailable("Esc", status)
+            escUnavailableShown = true
+        }
     } else if !chalk.laser, let key = escKey {
         UnregisterEventHotKey(key)
         escKey = nil
     }
     return noErr
 }, 1, &hotKeySpec, nil, nil)
-for (key, name, id) in [(kVK_ANSI_H, "⌃⌥H", UInt32(0)), (kVK_ANSI_L, "⌃⌥L", 1)] {
-    let status = handlerStatus != noErr ? handlerStatus : registerHotKey(key, modifiers: controlKey | optionKey, id: id).1
-    if status != noErr {
-        menu.insertItem(withTitle: "\(name) unavailable (error \(status))", action: nil, keyEquivalent: "", at: 0)
-    }
+for (key, name, event) in [(kVK_ANSI_H, "⌃⌥H", Event.toggleHighlight), (kVK_ANSI_L, "⌃⌥L", .toggleLaser)] {
+    let status = handlerStatus != noErr ? handlerStatus : registerHotKey(key, modifiers: controlKey | optionKey, for: event).1
+    if status != noErr { showUnavailable(name, status) }
 }
 
 buildOverlays()
