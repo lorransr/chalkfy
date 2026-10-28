@@ -35,3 +35,13 @@ jobs:
       - run: gh release create "$GITHUB_REF_NAME" Chalkfy.zip --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}
+      - name: Update the cask in lorransr/homebrew-tap
+        env:
+          GH_TOKEN: ${{ secrets.TAP_TOKEN }}
+        run: |
+          F=repos/lorransr/homebrew-tap/contents/Casks/chalkfy.rb
+          V=${GITHUB_REF_NAME#v}
+          SHA=$(shasum -a 256 Chalkfy.zip | cut -d' ' -f1)
+          gh api -H 'Accept: application/vnd.github.raw' "$F" \
+            | sed -e "s/^  version .*/  version \"$V\"/" -e "s/^  sha256 .*/  sha256 \"$SHA\"/" > chalkfy.rb
+          gh api -X PUT "$F" -f message="chalkfy $V" -f content="$(base64 < chalkfy.rb)" -f sha="$(gh api "$F" --jq .sha)" > /dev/null

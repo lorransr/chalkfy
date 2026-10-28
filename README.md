@@ -4,7 +4,7 @@ A menu bar app to point at things on a shared screen during a live call, on macO
 
 ## Install
 
-1. Download `Chalkfy.zip` from [Releases](https://github.com/lorransr/chalkfy/releases), unzip it and move `Chalkfy.app` to Applications.
+1. Run `brew install --cask lorransr/tap/chalkfy`, and `brew upgrade --cask chalkfy` to update. Or download `Chalkfy.zip` from [Releases](https://github.com/lorransr/chalkfy/releases), unzip it and move `Chalkfy.app` to Applications.
 2. Open it. Chalkfy is not notarized, so macOS blocks it: click Done, then in System Settings > Privacy & Security click "Open Anyway" and confirm. An update may ask for this again.
 3. From the menu bar icon, choose "Request Accessibility Permission" and turn Chalkfy on. The Laser needs it; the grant applies with no relaunch and survives updates.
 
