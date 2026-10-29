@@ -1,6 +1,8 @@
+<img src="site/favicon.svg" width="96" alt="">
+
 # Chalkfy
 
-A menu bar app to point at things on a shared screen during a live call, on macOS 14+.
+A menu bar app to point at things on a shared screen during a live call, on macOS 14+. [Site](https://lorransr.github.io/chalkfy/).
 
 ## Install
 
