@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chalkfy, a cursor ring and a fading laser for your Mac</title>
+<meta name="description" content="A free macOS menu bar app that shows your audience where to look on a shared screen.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@400;500;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+  <div class="container nav__row">
+    <a class="wordmark" href="./" aria-label="Chalkfy home">Chalkfy</a>
+    <nav aria-label="Main">
+      <a href="#donate">Donate</a>
+      <a href="https://github.com/lorransr/chalkfy">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <div class="container hero__grid">
+      <h1>Show the call where to look.</h1>
+      <div class="hero__side">
+        <p class="lead">A free Mac app that rings your cursor and draws fading strokes.</p>
+        <div class="cmd">
+          <code>brew install --cask lorransr/tap/chalkfy</code>
+          <button class="btn btn--primary" type="button" data-copy="brew install --cask lorransr/tap/chalkfy">Copy</button>
+        </div>
+        <p class="hero__alt"><a href="https://github.com/lorransr/chalkfy/releases/latest">Download the zip instead</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="demo" aria-label="Chalkfy at work">
+    <div class="container">
+      <figure class="demo__frame" data-loop data-slot="demo" data-kind="product" data-alt="A screen recording of Highlight and Laser over a slide">
+        <video muted loop playsinline preload="metadata" poster="media/demo-poster.jpg" width="1280" height="720" aria-label="Highlight follows the cursor over a bar chart, then the Laser circles Q3 and the stroke fades">
+          <source src="media/demo.webm" type="video/webm">
+          <source src="media/demo.mp4" type="video/mp4">
+        </video>
+        <button class="btn btn--quiet demo__toggle" type="button" data-loop-toggle data-keep>Pause</button>
+      </figure>
+      <p class="caption">A sample Q3 review. <kbd>⌃⌥H</kbd> turns on the Highlight, <kbd>⌃⌥L</kbd> the Laser.</p>
+    </div>
+  </section>
+
+  <section class="stages">
+    <div class="container">
+      <h2>From install to the call</h2>
+      <ol class="stages__list">
+        <li class="stage">
+          <div class="stage__text">
+            <h3>Install with brew</h3>
+            <p>Or download the zip. Chalkfy is not notarized, so macOS asks once: click Open Anyway in Privacy &amp; Security.</p>
+          </div>
+          <div class="plate plate--code">
+            <code><span class="plate__label">Install</span>brew install --cask lorransr/tap/chalkfy</code>
+            <code><span class="plate__label">Update</span>brew upgrade --cask chalkfy</code>
+          </div>
+        </li>
+        <li class="stage">
+          <div class="stage__text">
+            <h3>Allow Accessibility</h3>
+            <p>Only the Laser needs it. The grant applies with no relaunch and stays across updates.</p>
+          </div>
+          <dl class="plate plate--rows">
+            <div><dt>Open</dt><dd>The Chalkfy icon in the menu bar</dd></div>
+            <div><dt>Choose</dt><dd>Request Accessibility Permission</dd></div>
+            <div><dt>Turn on</dt><dd>Chalkfy, in System Settings</dd></div>
+          </dl>
+        </li>
+        <li class="stage stage--shot">
+          <div class="stage__text">
+            <h3>Ring the cursor</h3>
+            <p class="key"><kbd>⌃⌥H</kbd></p>
+            <p>A ring follows the cursor so the audience finds it. Press again to turn it off.</p>
+          </div>
+          <figure class="shot shot--narrow" data-slot="highlight" data-kind="product" data-alt="The Highlight ring on a bar of a chart">
+            <img src="media/highlight.jpg" width="738" height="492" loading="lazy" alt="A yellow ring around the cursor on the Q2 bar of a chart">
+          </figure>
+        </li>
+        <li class="stage stage--shot">
+          <div class="stage__text">
+            <h3>Draw, then let it fade</h3>
+            <p class="key"><kbd>⌃⌥L</kbd></p>
+            <p>Drag to draw a red stroke. It fades by itself, and the drag never reaches the app below. Esc turns it off.</p>
+          </div>
+          <figure class="shot shot--wide" data-slot="laser" data-kind="product" data-alt="Laser strokes around a chart column and toward a bullet">
+            <img src="media/laser.jpg" width="1280" height="720" loading="lazy" alt="A fading red circle around the Q3 bars and a red arrow to a bullet point">
+          </figure>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="board">
+    <div class="container">
+      <h2>Runs on any Mac since Sonoma</h2>
+      <table>
+        <tbody>
+          <tr><th scope="row">macOS</th><td><span class="figure">14</span> Sonoma or later</td></tr>
+          <tr><th scope="row">Chip</th><td>Apple silicon and Intel</td></tr>
+          <tr><th scope="row">Price</th><td><span class="figure">0</span> USD, no account</td></tr>
+          <tr><th scope="row">Firefox-based browsers</th><td><a class="nowrap" href="https://github.com/lorransr/chalkfy#firefox-based-browsers">One setting</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="donate" id="donate">
+    <div class="container">
+      <h2>Keep Chalkfy free</h2>
+      <p class="lead">Tips pay for the time behind the next version.</p>
+      <div class="donate__grid">
+        <div class="donate__way">
+          <h3>Ko-fi</h3>
+          <p>Card or PayPal, from anywhere.</p>
+          <p class="donate__where"><span class="fill" data-fill="ko-fi">Ko-fi page to be announced</span></p>
+          <button class="btn btn--quiet" type="button" disabled data-kofi>Tip on Ko-fi</button>
+        </div>
+        <div class="donate__way" lang="pt-BR">
+          <h3>Pix</h3>
+          <p>Para quem está no Brasil: copie a chave e cole no app do seu banco.</p>
+          <p class="donate__where"><span class="fill" data-fill="pix">Chave Pix a definir</span></p>
+          <button class="btn btn--quiet" type="button" data-copy="" disabled>Copiar chave</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="close">
+    <div class="container close__grid">
+      <div class="close__text">
+        <h2>Ring the cursor on your next call</h2>
+        <div class="cmd">
+          <code>brew install --cask lorransr/tap/chalkfy</code>
+          <button class="btn btn--primary" type="button" data-copy="brew install --cask lorransr/tap/chalkfy">Copy</button>
+        </div>
+        <p class="hero__alt"><a href="https://github.com/lorransr/chalkfy/releases/latest">Download the zip instead</a></p>
+      </div>
+      <figure class="shot shot--wide" data-slot="close" data-kind="product" data-alt="A Laser underline under a bullet point on a sample slide">
+        <img src="media/close.jpg" width="1280" height="720" loading="lazy" alt="A red Laser underline under a bullet point while the arrow before it fades">
+      </figure>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="container">
+    <p class="foot__mark">Chalkfy</p>
+    <nav class="foot__links" aria-label="Footer">
+      <a href="https://github.com/lorransr/chalkfy">Source</a>
+      <a href="https://github.com/lorransr/chalkfy/releases">Releases</a>
+      <a href="https://github.com/lorransr/chalkfy/issues">Report a problem</a>
+    </nav>
+    <p class="foot__legal">Made by <a href="https://github.com/lorransr">lorransr</a>. Demo data is a sample.</p>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
+  const label = b.textContent;
+  try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = b.lang === 'pt-BR' || b.closest('[lang="pt-BR"]') ? 'Copiado' : 'Copied'; }
+  catch { b.textContent = 'Select and copy'; }
+  setTimeout(() => { b.textContent = label; }, 1600);
+}));
+document.querySelectorAll('[data-loop]').forEach((el) => {
+  const btn = el.querySelector('[data-loop-toggle]');
+  const s = { seen: false, hover: false, focus: false, held: matchMedia('(prefers-reduced-motion: reduce)').matches };
+  const sync = () => {
+    const run = s.seen && !s.hover && !s.focus && !s.held;
+    el.classList.toggle('is-running', run);
+    el.querySelectorAll('video').forEach((v) => (run ? v.play().catch(() => {}) : v.pause()));
+    btn.textContent = s.held ? 'Play' : 'Pause';
+  };
+  btn.addEventListener('click', () => { s.held = !s.held; sync(); });
+  [['pointerenter', 'hover', true], ['pointerleave', 'hover', false], ['focusin', 'focus', true], ['focusout', 'focus', false]].forEach(([t, k, v]) => el.addEventListener(t, () => { s[k] = v; sync(); }));
+  new IntersectionObserver(([e]) => { s.seen = e.isIntersecting; sync(); }).observe(el);
+});
+</script>
+<script>window.hallmarkSlots = (m) => { for (const [k, v] of Object.entries(m)) { const s = document.querySelector(`[data-slot="${k}"]`); if (!s) continue; const im = new Image(); im.src = typeof v === 'string' ? v : v.src; im.alt = (typeof v === 'object' && v.alt) || s.dataset.alt || ''; s.querySelectorAll(':scope > img').forEach((o) => o.remove()); s.prepend(im); } };
+document.querySelectorAll('[data-slot] img').forEach((i) => { if (i.complete && !i.naturalWidth) i.remove(); else i.addEventListener('error', () => i.remove(), { once: true }); });</script>
+</body>
+</html>
