@@ -2,3 +2,4 @@ progress.txt
 .build/
 build/
 *.p12*
+.hallmark/
