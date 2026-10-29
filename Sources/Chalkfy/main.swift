@@ -130,7 +130,10 @@ requestItem.target = actions
 menu.addItem(.separator())
 menu.addItem(withTitle: "Quit Chalkfy", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
 let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-statusItem.button?.image = NSImage(systemSymbolName: "scribble", accessibilityDescription: "Chalkfy")
+// The symbol stands in outside the bundle, as with swift run. The "Template" suffix makes the PDF a template image.
+let icon = NSImage(named: "MenuBarTemplate") ?? NSImage(systemSymbolName: "scribble", accessibilityDescription: nil)
+icon?.accessibilityDescription = "Chalkfy"
+statusItem.button?.image = icon
 statusItem.menu = menu
 
 // Polls so the grant applies without a relaunch: there is no notification for it.
