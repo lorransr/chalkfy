@@ -8,7 +8,8 @@ cd "$(dirname "$0")"
 swift build -c release "$@"
 APP=build/Chalkfy.app
 rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+cp brand/AppIcon.icns brand/MenuBarTemplate.pdf "$APP/Contents/Resources/"
 cp "$(swift build -c release "$@" --show-bin-path)/Chalkfy" "$APP/Contents/MacOS/"
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -17,6 +18,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundleIdentifier</key><string>com.lorransr.chalkfy</string>
   <key>CFBundleName</key><string>Chalkfy</string>
   <key>CFBundleExecutable</key><string>Chalkfy</string>
+  <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>${VERSION:-0.0.0}</string>
   <key>CFBundleVersion</key><string>${BUILD:-0}</string>
