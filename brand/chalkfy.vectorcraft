@@ -860,126 +860,6 @@
               }
             },
             {
-              "id": 12,
-              "kind": {
-                "type": "text",
-                "kind": {
-                  "kind": "point"
-                },
-                "xf": [
-                  1.0,
-                  0.0,
-                  0.0,
-                  1.0,
-                  500.0,
-                  990.0
-                ],
-                "runs": [
-                  {
-                    "text": "Show the call",
-                    "style": {
-                      "font_family": "Chivo Mono",
-                      "font_style": "Medium",
-                      "size": 48.0,
-                      "tracking": 0.0,
-                      "baseline_shift": 0.0,
-                      "h_scale": 100.0,
-                      "v_scale": 100.0,
-                      "rotation": 0.0,
-                      "fill": {
-                        "type": "solid",
-                        "color": {
-                          "model": "rgb",
-                          "r": 0.14901961,
-                          "g": 0.16862746,
-                          "b": 0.2
-                        }
-                      },
-                      "stroke": {
-                        "type": "none"
-                      },
-                      "stroke_width": 0.0,
-                      "underline": false,
-                      "strikethrough": false,
-                      "all_caps": false
-                    }
-                  }
-                ],
-                "para": {
-                  "justify": "Left",
-                  "justify_auto": true,
-                  "left_indent": 0.0,
-                  "right_indent": 0.0,
-                  "first_line_indent": 0.0,
-                  "space_before": 0.0,
-                  "space_after": 0.0,
-                  "hyphenate": false,
-                  "mojikumi": "lineEndHalf",
-                  "burasagari": "standard"
-                }
-              }
-            },
-            {
-              "id": 13,
-              "kind": {
-                "type": "text",
-                "kind": {
-                  "kind": "point"
-                },
-                "xf": [
-                  1.0,
-                  0.0,
-                  0.0,
-                  1.0,
-                  500.0,
-                  1050.0
-                ],
-                "runs": [
-                  {
-                    "text": "where to look.",
-                    "style": {
-                      "font_family": "Chivo Mono",
-                      "font_style": "Medium",
-                      "size": 48.0,
-                      "tracking": 0.0,
-                      "baseline_shift": 0.0,
-                      "h_scale": 100.0,
-                      "v_scale": 100.0,
-                      "rotation": 0.0,
-                      "fill": {
-                        "type": "solid",
-                        "color": {
-                          "model": "rgb",
-                          "r": 0.14901961,
-                          "g": 0.16862746,
-                          "b": 0.2
-                        }
-                      },
-                      "stroke": {
-                        "type": "none"
-                      },
-                      "stroke_width": 0.0,
-                      "underline": false,
-                      "strikethrough": false,
-                      "all_caps": false
-                    }
-                  }
-                ],
-                "para": {
-                  "justify": "Left",
-                  "justify_auto": true,
-                  "left_indent": 0.0,
-                  "right_indent": 0.0,
-                  "first_line_indent": 0.0,
-                  "space_before": 0.0,
-                  "space_after": 0.0,
-                  "hyphenate": false,
-                  "mojikumi": "lineEndHalf",
-                  "burasagari": "standard"
-                }
-              }
-            },
-            {
               "id": 14,
               "appearance": {
                 "items": [
@@ -1161,6 +1041,126 @@
                       "closed": true
                     }
                   ]
+                }
+              }
+            },
+            {
+              "id": 16,
+              "kind": {
+                "type": "text",
+                "kind": {
+                  "kind": "point"
+                },
+                "xf": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  500.0,
+                  990.0
+                ],
+                "runs": [
+                  {
+                    "text": "Guide your audience",
+                    "style": {
+                      "font_family": "Chivo Mono",
+                      "font_style": "Medium",
+                      "size": 46.0,
+                      "tracking": 0.0,
+                      "baseline_shift": 0.0,
+                      "h_scale": 100.0,
+                      "v_scale": 100.0,
+                      "rotation": 0.0,
+                      "fill": {
+                        "type": "solid",
+                        "color": {
+                          "model": "rgb",
+                          "r": 0.14901961,
+                          "g": 0.16862746,
+                          "b": 0.2
+                        }
+                      },
+                      "stroke": {
+                        "type": "none"
+                      },
+                      "stroke_width": 0.0,
+                      "underline": false,
+                      "strikethrough": false,
+                      "all_caps": false
+                    }
+                  }
+                ],
+                "para": {
+                  "justify": "Left",
+                  "justify_auto": true,
+                  "left_indent": 0.0,
+                  "right_indent": 0.0,
+                  "first_line_indent": 0.0,
+                  "space_before": 0.0,
+                  "space_after": 0.0,
+                  "hyphenate": false,
+                  "mojikumi": "lineEndHalf",
+                  "burasagari": "standard"
+                }
+              }
+            },
+            {
+              "id": 17,
+              "kind": {
+                "type": "text",
+                "kind": {
+                  "kind": "point"
+                },
+                "xf": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  1.0,
+                  500.0,
+                  1050.0
+                ],
+                "runs": [
+                  {
+                    "text": "on any shared screen.",
+                    "style": {
+                      "font_family": "Chivo Mono",
+                      "font_style": "Medium",
+                      "size": 46.0,
+                      "tracking": 0.0,
+                      "baseline_shift": 0.0,
+                      "h_scale": 100.0,
+                      "v_scale": 100.0,
+                      "rotation": 0.0,
+                      "fill": {
+                        "type": "solid",
+                        "color": {
+                          "model": "rgb",
+                          "r": 0.14901961,
+                          "g": 0.16862746,
+                          "b": 0.2
+                        }
+                      },
+                      "stroke": {
+                        "type": "none"
+                      },
+                      "stroke_width": 0.0,
+                      "underline": false,
+                      "strikethrough": false,
+                      "all_caps": false
+                    }
+                  }
+                ],
+                "para": {
+                  "justify": "Left",
+                  "justify_auto": true,
+                  "left_indent": 0.0,
+                  "right_indent": 0.0,
+                  "first_line_indent": 0.0,
+                  "space_before": 0.0,
+                  "space_after": 0.0,
+                  "hyphenate": false,
+                  "mojikumi": "lineEndHalf",
+                  "burasagari": "standard"
                 }
               }
             }
@@ -2100,7 +2100,7 @@
     },
     "raster_effects_ppi": 72.0,
     "images": {},
-    "next_id": 16,
+    "next_id": 18,
     "metadata": {
       "author": "",
       "authorTitle": "",
@@ -2111,7 +2111,7 @@
       "copyrightNotice": "",
       "copyrightUrl": "",
       "created": 1793286935,
-      "modified": 1793286963
+      "modified": 1793287312
     },
     "last_view": {
       "name": "",
