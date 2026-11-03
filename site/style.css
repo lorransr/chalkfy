@@ -107,7 +107,7 @@ html:not(.js) .demo__toggle { display: none; }
 .donate__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-columns); margin-top: var(--space-2xl); }
 .donate__way { display: grid; gap: var(--space-md); align-content: start; justify-items: start; padding: var(--space-xl); border: var(--rule-bar) solid var(--color-ink); }
 .donate__way h3 { font-size: var(--text-2xl); }
-.donate__where { font-size: var(--text-lg); font-weight: 500; }
+.donate__where { font-size: var(--text-lg); font-weight: 500; overflow-wrap: anywhere; }
 .fill { padding: 0 0.25em; border: 1px dashed color-mix(in oklch, var(--color-muted) 70%, transparent); color: var(--color-muted); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 
 /* close */

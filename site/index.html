@@ -136,8 +136,8 @@
         <div class="donate__way" lang="pt-BR">
           <h3>Pix</h3>
           <p>Para quem está no Brasil: copie a chave e cole no app do seu banco.</p>
-          <p class="donate__where"><span class="fill" data-fill="pix">Chave Pix a definir</span></p>
-          <button class="btn btn--quiet" type="button" data-copy="" disabled>Copiar chave</button>
+          <p class="donate__where"><code>7e93e467-e161-4c8b-8ca3-9061ad817164</code></p>
+          <button class="btn btn--quiet" type="button" data-copy="7e93e467-e161-4c8b-8ca3-9061ad817164">Copiar chave</button>
         </div>
       </div>
     </div>
@@ -181,15 +181,14 @@ document.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('clic
 }));
 document.querySelectorAll('[data-loop]').forEach((el) => {
   const btn = el.querySelector('[data-loop-toggle]');
-  const s = { seen: false, hover: false, focus: false, held: matchMedia('(prefers-reduced-motion: reduce)').matches };
+  const s = { seen: false, held: matchMedia('(prefers-reduced-motion: reduce)').matches };
   const sync = () => {
-    const run = s.seen && !s.hover && !s.focus && !s.held;
+    const run = s.seen && !s.held;
     el.classList.toggle('is-running', run);
     el.querySelectorAll('video').forEach((v) => (run ? v.play().catch(() => {}) : v.pause()));
     btn.textContent = s.held ? 'Play' : 'Pause';
   };
   btn.addEventListener('click', () => { s.held = !s.held; sync(); });
-  [['pointerenter', 'hover', true], ['pointerleave', 'hover', false], ['focusin', 'focus', true], ['focusout', 'focus', false]].forEach(([t, k, v]) => el.addEventListener(t, () => { s[k] = v; sync(); }));
   new IntersectionObserver(([e]) => { s.seen = e.isIntersecting; sync(); }).observe(el);
 });
 </script>
