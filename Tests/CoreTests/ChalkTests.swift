@@ -148,7 +148,11 @@ import Testing
     #expect(chalk.scene(at: 1).marker == .dot(p))
     #expect(chalk.scene(at: 1).local(in: CGRect(x: 5, y: 5, width: 100, height: 100)).spotlight == CGPoint(x: 5, y: 15))
 
+    let q = CGPoint(x: 30, y: 40)
+    chalk.handle(.move(q), at: 1)
+    #expect(chalk.scene(at: 1).spotlight == q)
+
     chalk.handle(.toggleSpotlight, at: 2)
     #expect(chalk.scene(at: 2).spotlight == nil)
-    #expect(chalk.scene(at: 2).marker == .dot(p))
+    #expect(chalk.scene(at: 2).marker == .dot(q))
 }

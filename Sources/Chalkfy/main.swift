@@ -17,13 +17,7 @@ func handle(_ event: Event) -> Disposition {
     for overlay in overlays {
         let local = scene.local(in: overlay.window.frame)
         overlay.shade.isHidden = local.spotlight == nil
-        if let p = local.spotlight {
-            // Even-odd fill: the circle cuts a hole in the screen-sized rect. Off this display, the hole falls outside it.
-            let path = CGMutablePath()
-            path.addRect(overlay.window.contentView!.bounds)
-            path.addEllipse(in: CGRect(x: p.x - 150, y: p.y - 150, width: 300, height: 300))
-            overlay.shade.path = path
-        }
+        if let p = local.spotlight { overlay.shade.position = p }
         overlay.ring.isHidden = true
         overlay.dot.isHidden = true
         switch local.marker {
@@ -64,6 +58,7 @@ func handle(_ event: Event) -> Disposition {
 func buildOverlays() {
     overlays.forEach { $0.window.orderOut(nil) }
     primaryHeight = NSScreen.screens.first?.frame.height ?? 0
+    let desktop = NSScreen.screens.reduce(CGRect.null) { $0.union($1.frame) }
     overlays = NSScreen.screens.map { screen in
         let window = NSWindow(contentRect: screen.frame, styleMask: .borderless, backing: .buffered, defer: false)
         window.setFrame(screen.frame, display: false)
@@ -91,8 +86,14 @@ func buildOverlays() {
         dot.contentsScale = screen.backingScaleFactor
         dot.isHidden = true
 
+        // Even-odd fill: the circle cuts a hole in the rect. The rect is twice the desktop, so it covers this display wherever the cursor is.
+        let shadePath = CGMutablePath()
+        shadePath.addRect(CGRect(x: -desktop.width, y: -desktop.height, width: desktop.width * 2, height: desktop.height * 2))
+        shadePath.addEllipse(in: CGRect(x: -150, y: -150, width: 300, height: 300))
         let shade = CAShapeLayer()
+        shade.path = shadePath
         shade.fillRule = .evenOdd
+        shade.contentsScale = screen.backingScaleFactor
         shade.fillColor = NSColor.black.withAlphaComponent(0.6).cgColor
         shade.isHidden = true
 
