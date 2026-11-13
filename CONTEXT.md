@@ -17,8 +17,12 @@ The transparent layer above every app, on every display, where Chalkfy draws its
 
 **Highlight**:
 A mode where a ring follows the cursor so the audience can find it.
-_Avoid_: cursor ring, halo, spotlight
+_Avoid_: cursor ring, halo
 
 **Laser**:
 A mode where the presenter drags the mouse to draw a red stroke that fades by itself. The drag does not reach the app below.
 _Avoid_: laser pointer, pen, annotation
+
+**Spotlight**:
+A mode where every display goes dark, except for a circle around the cursor. It works together with the Highlight and the Laser.
+_Avoid_: dim, focus

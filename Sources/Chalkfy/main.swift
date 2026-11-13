@@ -3,7 +3,7 @@ import Carbon.HIToolbox
 import Core
 
 var chalk = Chalk()
-var overlays: [(window: NSWindow, ring: CAShapeLayer, dot: CAShapeLayer, strokes: CALayer)] = []
+var overlays: [(window: NSWindow, shade: CAShapeLayer, ring: CAShapeLayer, dot: CAShapeLayer, strokes: CALayer)] = []
 var primaryHeight: CGFloat = 0
 var tap: CFMachPort?
 
@@ -16,6 +16,8 @@ func handle(_ event: Event) -> Disposition {
     CATransaction.setDisableActions(true)
     for overlay in overlays {
         let local = scene.local(in: overlay.window.frame)
+        overlay.shade.isHidden = local.spotlight == nil
+        if let p = local.spotlight { overlay.shade.position = p }
         overlay.ring.isHidden = true
         overlay.dot.isHidden = true
         switch local.marker {
@@ -56,6 +58,7 @@ func handle(_ event: Event) -> Disposition {
 func buildOverlays() {
     overlays.forEach { $0.window.orderOut(nil) }
     primaryHeight = NSScreen.screens.first?.frame.height ?? 0
+    let desktop = NSScreen.screens.reduce(CGRect.null) { $0.union($1.frame) }
     overlays = NSScreen.screens.map { screen in
         let window = NSWindow(contentRect: screen.frame, styleMask: .borderless, backing: .buffered, defer: false)
         window.setFrame(screen.frame, display: false)
@@ -83,11 +86,22 @@ func buildOverlays() {
         dot.contentsScale = screen.backingScaleFactor
         dot.isHidden = true
 
+        // Even-odd fill: the circle cuts a hole in the rect. The rect is twice the desktop, so it covers this display wherever the cursor is.
+        let shadePath = CGMutablePath()
+        shadePath.addRect(CGRect(x: -desktop.width, y: -desktop.height, width: desktop.width * 2, height: desktop.height * 2))
+        shadePath.addEllipse(in: CGRect(x: -150, y: -150, width: 300, height: 300))
+        let shade = CAShapeLayer()
+        shade.path = shadePath
+        shade.fillRule = .evenOdd
+        shade.contentsScale = screen.backingScaleFactor
+        shade.fillColor = NSColor.black.withAlphaComponent(0.6).cgColor
+        shade.isHidden = true
+
         let strokes = CALayer()
-        [strokes, ring, dot].forEach(window.contentView!.layer!.addSublayer)
+        [shade, strokes, ring, dot].forEach(window.contentView!.layer!.addSublayer)
 
         window.orderFrontRegardless()
-        return (window, ring, dot, strokes)
+        return (window, shade, ring, dot, strokes)
     }
     handle(.move(NSEvent.mouseLocation))
 }
@@ -152,7 +166,7 @@ checkAccessibility()
 Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in checkAccessibility() }
 
 // The id of each hotkey is the index of its event here.
-let hotKeyEvents: [Event] = [.toggleHighlight, .toggleLaser, .escape]
+let hotKeyEvents: [Event] = [.toggleHighlight, .toggleLaser, .escape, .toggleSpotlight]
 func registerHotKey(_ key: Int, modifiers: Int, for event: Event) -> (EventHotKeyRef?, OSStatus) {
     var ref: EventHotKeyRef?
     let id = EventHotKeyID(signature: 0x43484C4B, id: UInt32(hotKeyEvents.firstIndex(of: event)!))
@@ -185,7 +199,7 @@ let handlerStatus = InstallEventHandler(GetApplicationEventTarget(), { _, event,
     }
     return noErr
 }, 1, &hotKeySpec, nil, nil)
-for (key, name, event) in [(kVK_ANSI_H, "⌃⌥H", Event.toggleHighlight), (kVK_ANSI_L, "⌃⌥L", .toggleLaser)] {
+for (key, name, event) in [(kVK_ANSI_H, "⌃⌥H", Event.toggleHighlight), (kVK_ANSI_L, "⌃⌥L", .toggleLaser), (kVK_ANSI_S, "⌃⌥S", .toggleSpotlight)] {
     let status = handlerStatus != noErr ? handlerStatus : registerHotKey(key, modifiers: controlKey | optionKey, for: event).1
     if status != noErr { showUnavailable(name, status) }
 }
