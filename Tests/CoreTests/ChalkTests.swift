@@ -135,3 +135,20 @@ import Testing
     #expect(chalk.scene(at: 1).strokes == [Stroke(points: [a, b], releasedAt: 1), Stroke(points: [b])])
     #expect(chalk.scene(at: 3).strokes == [Stroke(points: [b])])
 }
+
+@Test func spotlightTogglesIndependentlyAndFollowsTheCursor() {
+    var chalk = Chalk()
+    let p = CGPoint(x: 10, y: 20)
+    chalk.handle(.move(p), at: 0)
+    #expect(chalk.scene(at: 0).spotlight == nil)
+
+    #expect(chalk.handle(.toggleSpotlight, at: 1) == .swallow)
+    chalk.handle(.toggleLaser, at: 1)
+    #expect(chalk.scene(at: 1).spotlight == p)
+    #expect(chalk.scene(at: 1).marker == .dot(p))
+    #expect(chalk.scene(at: 1).local(in: CGRect(x: 5, y: 5, width: 100, height: 100)).spotlight == CGPoint(x: 5, y: 15))
+
+    chalk.handle(.toggleSpotlight, at: 2)
+    #expect(chalk.scene(at: 2).spotlight == nil)
+    #expect(chalk.scene(at: 2).marker == .dot(p))
+}

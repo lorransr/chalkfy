@@ -2,7 +2,7 @@ import CoreGraphics
 
 /// Points are global desktop coordinates in Cocoa's convention: origin at the bottom left of the primary display, y up.
 public enum Event: Equatable {
-    case toggleHighlight, toggleLaser, escape
+    case toggleHighlight, toggleLaser, toggleSpotlight, escape
     case move(CGPoint), press(CGPoint), drag(CGPoint), release(CGPoint)
 }
 
@@ -39,15 +39,19 @@ public struct Stroke: Equatable {
 public struct Scene: Equatable {
     public var marker: Marker?
     public var strokes: [Stroke] = []
+    /// The center of the lit circle; nil when the Spotlight is off.
+    public var spotlight: CGPoint?
 
     public func local(in frame: CGRect) -> Scene {
         Scene(marker: marker?.offset(by: frame.origin),
-              strokes: strokes.map { Stroke(points: $0.points.map { $0.offset(by: frame.origin) }, releasedAt: $0.releasedAt) })
+              strokes: strokes.map { Stroke(points: $0.points.map { $0.offset(by: frame.origin) }, releasedAt: $0.releasedAt) },
+              spotlight: spotlight?.offset(by: frame.origin))
     }
 }
 
 public struct Chalk {
     var highlight = false
+    var spotlight = false
     public private(set) var laser = false
     var cursor = CGPoint.zero
     var strokes: [Stroke] = []
@@ -63,6 +67,9 @@ public struct Chalk {
         switch event {
         case .toggleHighlight:
             highlight.toggle()
+            return .swallow
+        case .toggleSpotlight:
+            spotlight.toggle()
             return .swallow
         case .toggleLaser:
             setLaser(!laser, at: time)
@@ -110,7 +117,8 @@ public struct Chalk {
 
     public func scene(at time: Double) -> Scene {
         Scene(marker: laser ? .dot(cursor) : highlight ? .ring(cursor) : nil,
-              strokes: strokes.filter { $0.visible(at: time) } + (drawing.map { [$0] } ?? []))
+              strokes: strokes.filter { $0.visible(at: time) } + (drawing.map { [$0] } ?? []),
+              spotlight: spotlight ? cursor : nil)
     }
 }
 

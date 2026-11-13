@@ -3,7 +3,7 @@ import Carbon.HIToolbox
 import Core
 
 var chalk = Chalk()
-var overlays: [(window: NSWindow, ring: CAShapeLayer, dot: CAShapeLayer, strokes: CALayer)] = []
+var overlays: [(window: NSWindow, shade: CAShapeLayer, ring: CAShapeLayer, dot: CAShapeLayer, strokes: CALayer)] = []
 var primaryHeight: CGFloat = 0
 var tap: CFMachPort?
 
@@ -16,6 +16,14 @@ func handle(_ event: Event) -> Disposition {
     CATransaction.setDisableActions(true)
     for overlay in overlays {
         let local = scene.local(in: overlay.window.frame)
+        overlay.shade.isHidden = local.spotlight == nil
+        if let p = local.spotlight {
+            // Even-odd fill: the circle cuts a hole in the screen-sized rect. Off this display, the hole falls outside it.
+            let path = CGMutablePath()
+            path.addRect(overlay.window.contentView!.bounds)
+            path.addEllipse(in: CGRect(x: p.x - 150, y: p.y - 150, width: 300, height: 300))
+            overlay.shade.path = path
+        }
         overlay.ring.isHidden = true
         overlay.dot.isHidden = true
         switch local.marker {
@@ -83,11 +91,16 @@ func buildOverlays() {
         dot.contentsScale = screen.backingScaleFactor
         dot.isHidden = true
 
+        let shade = CAShapeLayer()
+        shade.fillRule = .evenOdd
+        shade.fillColor = NSColor.black.withAlphaComponent(0.6).cgColor
+        shade.isHidden = true
+
         let strokes = CALayer()
-        [strokes, ring, dot].forEach(window.contentView!.layer!.addSublayer)
+        [shade, strokes, ring, dot].forEach(window.contentView!.layer!.addSublayer)
 
         window.orderFrontRegardless()
-        return (window, ring, dot, strokes)
+        return (window, shade, ring, dot, strokes)
     }
     handle(.move(NSEvent.mouseLocation))
 }
@@ -152,7 +165,7 @@ checkAccessibility()
 Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in checkAccessibility() }
 
 // The id of each hotkey is the index of its event here.
-let hotKeyEvents: [Event] = [.toggleHighlight, .toggleLaser, .escape]
+let hotKeyEvents: [Event] = [.toggleHighlight, .toggleLaser, .escape, .toggleSpotlight]
 func registerHotKey(_ key: Int, modifiers: Int, for event: Event) -> (EventHotKeyRef?, OSStatus) {
     var ref: EventHotKeyRef?
     let id = EventHotKeyID(signature: 0x43484C4B, id: UInt32(hotKeyEvents.firstIndex(of: event)!))
@@ -185,7 +198,7 @@ let handlerStatus = InstallEventHandler(GetApplicationEventTarget(), { _, event,
     }
     return noErr
 }, 1, &hotKeySpec, nil, nil)
-for (key, name, event) in [(kVK_ANSI_H, "⌃⌥H", Event.toggleHighlight), (kVK_ANSI_L, "⌃⌥L", .toggleLaser)] {
+for (key, name, event) in [(kVK_ANSI_H, "⌃⌥H", Event.toggleHighlight), (kVK_ANSI_L, "⌃⌥L", .toggleLaser), (kVK_ANSI_S, "⌃⌥S", .toggleSpotlight)] {
     let status = handlerStatus != noErr ? handlerStatus : registerHotKey(key, modifiers: controlKey | optionKey, for: event).1
     if status != noErr { showUnavailable(name, status) }
 }
