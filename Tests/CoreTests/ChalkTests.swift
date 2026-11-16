@@ -90,6 +90,18 @@ import Testing
     #expect(chalk.scene(at: 4.5).strokes.isEmpty)
 }
 
+@Test func aStrokeFadesWithTheFadeTimeOfItsRelease() {
+    var chalk = Chalk()
+    chalk.fade = 1
+    let a = CGPoint(x: 0, y: 0)
+    chalk.handle(.toggleLaser, at: 0)
+    chalk.handle(.press(a), at: 0)
+    chalk.handle(.release(a), at: 1)
+    chalk.fade = 4
+    #expect(chalk.scene(at: 1.9).strokes.count == 1)
+    #expect(chalk.scene(at: 2).strokes.isEmpty)
+}
+
 @Test func aStrokeAcrossADisplayEdgeShowsOnBoth() {
     var chalk = Chalk()
     chalk.handle(.toggleLaser, at: 0)

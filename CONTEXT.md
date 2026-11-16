@@ -26,3 +26,7 @@ _Avoid_: laser pointer, pen, annotation
 **Spotlight**:
 A mode where every display goes dark, except for a circle around the cursor. It works together with the Highlight and the Laser.
 _Avoid_: dim, focus
+
+**Settings**:
+The values the presenter picks in the menu bar: the size of the Highlight and of the Spotlight, how dark the Spotlight is and how long a Laser stroke takes to fade. They survive a relaunch and an update.
+_Avoid_: options, preferences
