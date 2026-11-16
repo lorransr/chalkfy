@@ -3,6 +3,7 @@ import Carbon.HIToolbox
 import Core
 
 var chalk = Chalk()
+let defaults = UserDefaults.standard
 var overlays: [(window: NSWindow, shade: CAShapeLayer, ring: CAShapeLayer, dot: CAShapeLayer, strokes: CALayer)] = []
 var primaryHeight: CGFloat = 0
 var tap: CFMachPort?
@@ -45,7 +46,7 @@ func handle(_ event: Event) -> Disposition {
                 fade.fromValue = 1
                 fade.toValue = 0
                 fade.beginTime = releasedAt
-                fade.duration = Stroke.fade
+                fade.duration = chalk.fade
                 layer.add(fade, forKey: nil)
             }
             return layer
@@ -59,6 +60,7 @@ func buildOverlays() {
     overlays.forEach { $0.window.orderOut(nil) }
     primaryHeight = NSScreen.screens.first?.frame.height ?? 0
     let desktop = NSScreen.screens.reduce(CGRect.null) { $0.union($1.frame) }
+    let ringRadius = defaults.double(forKey: "highlightRadius"), holeRadius = defaults.double(forKey: "spotlightRadius")
     overlays = NSScreen.screens.map { screen in
         let window = NSWindow(contentRect: screen.frame, styleMask: .borderless, backing: .buffered, defer: false)
         window.setFrame(screen.frame, display: false)
@@ -73,7 +75,7 @@ func buildOverlays() {
         window.contentView!.wantsLayer = true
 
         let ring = CAShapeLayer()
-        ring.path = CGPath(ellipseIn: CGRect(x: -30, y: -30, width: 60, height: 60), transform: nil)
+        ring.path = CGPath(ellipseIn: CGRect(x: -ringRadius, y: -ringRadius, width: ringRadius * 2, height: ringRadius * 2), transform: nil)
         ring.lineWidth = 3
         ring.strokeColor = NSColor.systemYellow.cgColor
         ring.fillColor = NSColor.systemYellow.withAlphaComponent(0.25).cgColor
@@ -89,12 +91,12 @@ func buildOverlays() {
         // Even-odd fill: the circle cuts a hole in the rect. The rect is twice the desktop, so it covers this display wherever the cursor is.
         let shadePath = CGMutablePath()
         shadePath.addRect(CGRect(x: -desktop.width, y: -desktop.height, width: desktop.width * 2, height: desktop.height * 2))
-        shadePath.addEllipse(in: CGRect(x: -150, y: -150, width: 300, height: 300))
+        shadePath.addEllipse(in: CGRect(x: -holeRadius, y: -holeRadius, width: holeRadius * 2, height: holeRadius * 2))
         let shade = CAShapeLayer()
         shade.path = shadePath
         shade.fillRule = .evenOdd
         shade.contentsScale = screen.backingScaleFactor
-        shade.fillColor = NSColor.black.withAlphaComponent(0.6).cgColor
+        shade.fillColor = NSColor.black.withAlphaComponent(defaults.double(forKey: "spotlightDim")).cgColor
         shade.isHidden = true
 
         let strokes = CALayer()
@@ -133,6 +135,13 @@ final class Actions: NSObject {
     @objc func requestAccessibility() {
         AXIsProcessTrustedWithOptions([kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary)
     }
+
+    @objc func choose(_ item: NSMenuItem) {
+        let (key, value) = item.representedObject as! (String, Double)
+        defaults.set(value, forKey: key)
+        item.menu?.items.forEach { $0.state = $0 === item ? .on : .off }
+        applySettings()
+    }
 }
 
 let app = NSApplication.shared
@@ -141,6 +150,29 @@ let menu = NSMenu()
 let accessibilityItem = menu.addItem(withTitle: "", action: nil, keyEquivalent: "")
 let requestItem = menu.addItem(withTitle: "Request Accessibility Permission", action: #selector(Actions.requestAccessibility), keyEquivalent: "")
 requestItem.target = actions
+menu.addItem(.separator())
+// The middle choice of each setting is its default.
+let settings: [(title: String, key: String, choices: [(name: String, value: Double)])] = [
+    ("Spotlight Dim", "spotlightDim", [("40%", 0.4), ("60%", 0.6), ("80%", 0.8)]),
+    ("Spotlight Size", "spotlightRadius", [("Small", 100), ("Medium", 150), ("Large", 200)]),
+    ("Highlight Size", "highlightRadius", [("Small", 20), ("Medium", 30), ("Large", 45)]),
+    ("Laser Fade", "laserFade", [("1 s", 1), ("2 s", 2), ("4 s", 4)]),
+]
+defaults.register(defaults: Dictionary(uniqueKeysWithValues: settings.map { ($0.key, $0.choices[1].value) }))
+for setting in settings {
+    let submenu = NSMenu()
+    for choice in setting.choices {
+        let item = submenu.addItem(withTitle: choice.name, action: #selector(Actions.choose), keyEquivalent: "")
+        item.target = actions
+        item.representedObject = (setting.key, choice.value)
+        item.state = defaults.double(forKey: setting.key) == choice.value ? .on : .off
+    }
+    menu.addItem(withTitle: setting.title, action: nil, keyEquivalent: "").submenu = submenu
+}
+func applySettings() {
+    chalk.fade = defaults.double(forKey: "laserFade")
+    buildOverlays()
+}
 menu.addItem(.separator())
 menu.addItem(withTitle: "Quit Chalkfy", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
 let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -204,7 +236,7 @@ for (key, name, event) in [(kVK_ANSI_H, "⌃⌥H", Event.toggleHighlight), (kVK_
     if status != noErr { showUnavailable(name, status) }
 }
 
-buildOverlays()
+applySettings()
 NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { _ in
     buildOverlays()
 }

@@ -20,8 +20,6 @@ public enum Marker: Equatable {
 }
 
 public struct Stroke: Equatable {
-    public static let fade = 2.0
-
     public var points: [CGPoint]
     /// Nil while the drag goes on.
     public var releasedAt: Double?
@@ -31,8 +29,8 @@ public struct Stroke: Equatable {
         self.releasedAt = releasedAt
     }
 
-    func visible(at time: Double) -> Bool {
-        releasedAt.map { time - $0 < Stroke.fade } ?? true
+    func visible(at time: Double, fade: Double) -> Bool {
+        releasedAt.map { time - $0 < fade } ?? true
     }
 }
 
@@ -53,6 +51,8 @@ public struct Chalk {
     var highlight = false
     var spotlight = false
     public private(set) var laser = false
+    /// Seconds a released stroke takes to fade.
+    public var fade = 2.0
     var cursor = CGPoint.zero
     var strokes: [Stroke] = []
     var drawing: Stroke?
@@ -63,7 +63,7 @@ public struct Chalk {
 
     @discardableResult
     public mutating func handle(_ event: Event, at time: Double) -> Disposition {
-        strokes.removeAll { !$0.visible(at: time) }
+        strokes.removeAll { !$0.visible(at: time, fade: fade) }
         switch event {
         case .toggleHighlight:
             highlight.toggle()
@@ -117,7 +117,7 @@ public struct Chalk {
 
     public func scene(at time: Double) -> Scene {
         Scene(marker: laser ? .dot(cursor) : highlight ? .ring(cursor) : nil,
-              strokes: strokes.filter { $0.visible(at: time) } + (drawing.map { [$0] } ?? []),
+              strokes: strokes.filter { $0.visible(at: time, fade: fade) } + (drawing.map { [$0] } ?? []),
               spotlight: spotlight ? cursor : nil)
     }
 }
