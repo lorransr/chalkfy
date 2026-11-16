@@ -18,6 +18,8 @@ To start Chalkfy at login, add it in System Settings > General > Login Items.
 - ⌃⌥L: Laser on or off. Drag to draw a red stroke that fades by itself. Esc also turns it off.
 - ⌃⌥S: Spotlight on or off. The screen goes dark, except for a circle around the cursor.
 
+## Settings
+
 The menu bar icon sets the size of the ring and the circle, how dark the Spotlight is and how long a stroke takes to fade.
 
 ## Firefox-based browsers

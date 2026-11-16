@@ -23,13 +23,16 @@ public struct Stroke: Equatable {
     public var points: [CGPoint]
     /// Nil while the drag goes on.
     public var releasedAt: Double?
+    /// Seconds the stroke takes to fade, kept from its release so a later change of `Chalk.fade` does not make it jump.
+    public var fade: Double
 
-    public init(points: [CGPoint], releasedAt: Double? = nil) {
+    public init(points: [CGPoint], releasedAt: Double? = nil, fade: Double = Chalk.defaultFade) {
         self.points = points
         self.releasedAt = releasedAt
+        self.fade = fade
     }
 
-    func visible(at time: Double, fade: Double) -> Bool {
+    func visible(at time: Double) -> Bool {
         releasedAt.map { time - $0 < fade } ?? true
     }
 }
@@ -42,17 +45,19 @@ public struct Scene: Equatable {
 
     public func local(in frame: CGRect) -> Scene {
         Scene(marker: marker?.offset(by: frame.origin),
-              strokes: strokes.map { Stroke(points: $0.points.map { $0.offset(by: frame.origin) }, releasedAt: $0.releasedAt) },
+              strokes: strokes.map { Stroke(points: $0.points.map { $0.offset(by: frame.origin) }, releasedAt: $0.releasedAt, fade: $0.fade) },
               spotlight: spotlight?.offset(by: frame.origin))
     }
 }
 
 public struct Chalk {
+    public static let defaultFade = 2.0
+
     var highlight = false
     var spotlight = false
     public private(set) var laser = false
-    /// Seconds a released stroke takes to fade.
-    public var fade = 2.0
+    /// Seconds a stroke released from now on takes to fade.
+    public var fade = Chalk.defaultFade
     var cursor = CGPoint.zero
     var strokes: [Stroke] = []
     var drawing: Stroke?
@@ -63,7 +68,7 @@ public struct Chalk {
 
     @discardableResult
     public mutating func handle(_ event: Event, at time: Double) -> Disposition {
-        strokes.removeAll { !$0.visible(at: time, fade: fade) }
+        strokes.removeAll { !$0.visible(at: time) }
         switch event {
         case .toggleHighlight:
             highlight.toggle()
@@ -111,13 +116,14 @@ public struct Chalk {
     mutating func endStroke(at time: Double) {
         guard var stroke = drawing else { return }
         stroke.releasedAt = time
+        stroke.fade = fade
         strokes.append(stroke)
         drawing = nil
     }
 
     public func scene(at time: Double) -> Scene {
         Scene(marker: laser ? .dot(cursor) : highlight ? .ring(cursor) : nil,
-              strokes: strokes.filter { $0.visible(at: time, fade: fade) } + (drawing.map { [$0] } ?? []),
+              strokes: strokes.filter { $0.visible(at: time) } + (drawing.map { [$0] } ?? []),
               spotlight: spotlight ? cursor : nil)
     }
 }
