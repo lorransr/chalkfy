@@ -4,6 +4,8 @@
 
 A menu bar app to point at things on a shared screen during a live call, on macOS 14+. [Site](https://lorransr.github.io/chalkfy/).
 
+![Spotlight and Laser over a system diagram, then Highlight and Laser over three sample talks](site/media/demo.gif)
+
 ## Install
 
 1. Run `brew install --cask lorransr/tap/chalkfy`, and `brew upgrade --cask chalkfy` to update. Or download `Chalkfy.zip` from [Releases](https://github.com/lorransr/chalkfy/releases), unzip it and move `Chalkfy.app` to Applications.

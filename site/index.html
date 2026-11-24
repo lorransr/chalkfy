@@ -47,14 +47,14 @@
 
   <section class="demo" aria-label="Chalkfy at work">
     <div class="container">
-      <figure class="demo__frame" data-loop data-slot="demo" data-kind="product" data-alt="A screen recording of Highlight and Laser over a slide">
-        <video muted loop playsinline preload="metadata" poster="media/demo-poster.jpg" width="1280" height="720" aria-label="Three sample talks. In each one the Highlight ring follows the cursor, then Laser strokes circle a detail and fade">
+      <figure class="demo__frame" data-loop data-slot="demo" data-kind="product" data-alt="A screen recording of Highlight, Spotlight and Laser over a system diagram and three slides">
+        <video muted loop playsinline preload="metadata" poster="media/demo-poster.jpg" width="1280" height="720" aria-label="Four sample talks. In the first one, a system diagram, the Spotlight dims the screen around the cursor. In the other three the Highlight ring follows the cursor. In each one Laser strokes circle a detail and fade">
           <source src="media/demo.webm" type="video/webm">
           <source src="media/demo.mp4" type="video/mp4">
         </video>
         <button class="btn btn--quiet demo__toggle" type="button" data-loop-toggle data-keep>Pause</button>
       </figure>
-      <p class="caption">Three sample talks: a Q3 review, a design review and a Python class in VS Code.</p>
+      <p class="caption">Four sample talks: a system diagram, a Q3 review, a design review and a Python class in VS Code.</p>
     </div>
   </section>
 
@@ -101,6 +101,16 @@
           </div>
           <figure class="shot shot--wide" data-slot="laser" data-kind="product" data-alt="Laser strokes over two versions of a checkout screen in a design tool">
             <img src="media/laser.jpg" width="1280" height="720" loading="lazy" alt="A red circle around the promo code and gift card fields of checkout v1, and a red arrow to the code link of v2">
+          </figure>
+        </li>
+        <li class="stage stage--shot">
+          <div class="stage__text">
+            <h3>Dim the rest</h3>
+            <p class="key"><kbd>⌃⌥S</kbd></p>
+            <p>Every display goes dark, except for a circle around the cursor. It works with the ring and the Laser. The menu bar icon sets its size and how dark it gets.</p>
+          </div>
+          <figure class="shot shot--wide" data-slot="spotlight" data-kind="product" data-alt="The Spotlight on a Python loop in VS Code">
+            <img src="media/spotlight.jpg" width="1280" height="720" loading="lazy" alt="The VS Code window goes dark, except for a circle of light around the cursor and the ring on the body of a Python loop">
           </figure>
         </li>
       </ol>
